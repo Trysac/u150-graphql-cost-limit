@@ -1,29 +1,16 @@
 # Architecture
 
-## Purpose
+`trysac-graphql-cost-limit` provides pre-execution static analysis of GraphQL query documents.
 
-`trysac-graphql-cost-limit` is a small, dependency-free Python library: Schema-aware cost and depth limits for GraphQL queries before execution: slicing-argument multipliers, fragment cycle detection and pre-parse nesting guards
+## Execution Phases
 
-## Shape
-
-```text
-caller code --> graphql_cost_limit (public API in __init__.py)
-                    |
-                    +-- pure functions, no I/O, no global state
-```
-
-- **Public API**: the names listed in `__all__` of `src/graphql_cost_limit/__init__.py`. Anything else is
-  internal and may change without a major version.
-- **Errors**: invalid input raises built-in exceptions (`ValueError`, `TypeError`) with a clear
-  message; the library never prints or exits.
-- **Side effects**: none. If a feature needs I/O, isolate it in its own module behind a small
-  interface and record the choice in an ADR.
-
-## Quality contract
-
-`scripts/check.py` is the single definition of the gates; `fabrica.json` tells the factory and CI
-how to run it. See [TESTING.md](TESTING.md).
-
-## Decisions
-
-Architecture decisions are recorded in [decisions/](decisions/) as numbered ADRs.
+1. **Length Guard**: Verifies query string length against `config.max_query_chars`.
+2. **Lexical Pre-parse Scanner**: Counts curly braces `{` outside string literals and comments to reject deeply nested documents before invoking parser AST generation.
+3. **AST Parsing**: Parses query with `graphql-core` and normalizes schema (via `build_schema` if passed as SDL).
+4. **Operation Selection**: Selects targeted operation or validates single operation constraint.
+5. **Recursive AST Traversal**:
+   - Calculates field cost based on configured overrides, object defaults, or leaf defaults.
+   - Resolves slicing argument multipliers for list-wrapped types.
+   - Expands fragment spreads and inline fragments with cycle detection.
+   - Measures maximum query nesting depth.
+6. **Limit Check**: In `check()`, validates `cost <= max_cost` and `depth <= max_depth`, raising `CostLimitError` on violations.

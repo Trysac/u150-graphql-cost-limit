@@ -17,7 +17,9 @@ classifiers = [
     "Operating System :: OS Independent",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "graphql-core>=3.2,<3.3",
+]
 
 [project.urls]
 Homepage = "https://github.com/Trysac/u150-graphql-cost-limit"
