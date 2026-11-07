@@ -9,4 +9,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Implement schema-aware GraphQL cost and depth analysis with slicing multipliers and pre-parse guards.
 - Initial project structure from the factory utility template.

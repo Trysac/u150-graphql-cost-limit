@@ -2,18 +2,21 @@
 
 ## Threat model
 
-`trysac-graphql-cost-limit` is a pure library without I/O. The main risks are:
+`graphql-cost-limit` performs static analysis of GraphQL query strings.
 
-- **Supply chain**: a compromised dependency or CI action. Mitigation: no runtime dependencies,
-  Dependabot weekly updates, actions pinned to major versions, minimal workflow permissions.
-- **Leaked secrets**: tokens committed by mistake. Mitigation: `gitleaks` runs in the local gates
-  and in CI; `.env` files are git-ignored.
-- **Untrusted input**: callers may pass hostile strings. Mitigation: validate input and fail with
-  explicit exceptions; never `eval`, `exec` or deserialize untrusted data.
+### Defended
 
-## Publishing
+- **Resource Exhaustion (Static)**: Maliciously crafted queries designed to be computationally expensive to parse or execute (e.g., deeply nested braces, massive string length) are rejected before full AST generation using pre-parse lexical scans.
+- **Infinite Recursion**: Fragment cycles are detected during the recursive AST walk and rejected.
+- **Oversized Payloads**: Queries exceeding `max_query_chars` (default 100,000) are rejected immediately.
+- **Malformed Queries**: Syntactically invalid queries are rejected with an explicit `syntax_error` code.
 
-Releases are published to PyPI with trusted publishing (OIDC) when available, never with a
-long-lived token stored in the repository.
+### Limits from code
 
-To report a vulnerability, see [SECURITY.md](../SECURITY.md).
+- `max_query_chars`: 100,000 characters.
+- `max_nesting`: 100 levels of nested curly braces.
+
+### Not defended
+
+- **Runtime Execution**: This library only performs static analysis. It does not control execution or measure actual database load during query resolution.
+- **IO/System Calls**: The library is a pure computation utility and does not perform I/O.

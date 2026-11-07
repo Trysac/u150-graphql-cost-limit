@@ -3,18 +3,18 @@
 ## Running
 
 ```sh
-uv run pytest --cov=graphql_cost_limit   # tests with coverage report
-uv run python scripts/check.py      # every gate, as CI and the factory run it
+pytest
 ```
 
-## Policy
+## Coverage
 
-- Branch coverage of `src/graphql_cost_limit` must stay at or above 80 %; the gate fails below it.
-- Tests exercise the public API (`import graphql_cost_limit`) and assert every observable effect:
-  return values, raised exceptions and their messages.
-- Each bug fix starts with a failing test that reproduces it.
-- Tests are deterministic: no network, no wall clock, no dependence on test order.
+The test suite is located in `tests/test_graphql_cost_limit.py`. It covers the following scenarios:
 
-## Layout
-
-`tests/test_<module>.py` mirrors each public module. Shared fixtures go in `tests/conftest.py`.
+- Cost and depth calculations for various schema and query combinations (acceptance tests).
+- Detection of fragment cycles.
+- Handling of unknown fields and fragments.
+- Validation of slicing arguments (e.g., non-integer, negative values).
+- Pre-parse guards for query length and brace nesting.
+- Operation selection and validation (e.g., missing operations, unknown operation names).
+- Support for mutations and subscriptions.
+- Validation of `max_cost` and `max_depth` limits via `check()`.
