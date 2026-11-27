@@ -8,8 +8,10 @@ Public GraphQL endpoints accept queries that nest friends of friends ten levels 
 
 ## Installation
 
+Not published to PyPI yet. Install it from GitHub:
+
 ```bash
-pip install graphql-cost-limit
+pip install "git+https://github.com/Trysac/u150-graphql-cost-limit"
 ```
 
 ## Usage
